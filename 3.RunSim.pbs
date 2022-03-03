@@ -1,0 +1,15 @@
+#!/bin/bash
+#PBS -P RDS-FSC-EvolNutStrats-RW
+#PBS -l select=1:ncpus=1:mem=8GB
+#PBS -l walltime=2:00:00
+#PBS -q defaultQ
+#PBS -e /project/RDS-FSC-EvolNutStrats-RW/GenSim/GenSimOut
+#PBS -o /project/RDS-FSC-EvolNutStrats-RW/GenSim/GenSimOut
+#### array job ####
+#PBS -J 0-999
+
+cd /project/RDS-FSC-EvolNutStrats-RW/GenSim
+
+module load R/4.1.1
+
+Rscript 2.Full_Simulation.R $PBS_ARRAY_INDEX
