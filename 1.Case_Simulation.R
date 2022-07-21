@@ -67,22 +67,40 @@ dat<-my_sim(n_strain=1, n=400, lnHR=-0.5, sigma_IntG=0, sigma_Tr=0, cor_IntTrt=0
 fit<-survfit(Surv(eventtime/7, status) ~ trts, data=dat)
 
 # Plot a boxplot + violin
-pdf("F1.A.pdf", height=4, width=4)
-p1<-ggplot(dat, aes(x=diet, y=eventtime/7, col=diet)) + geom_violin(aes(fill=diet), linetype=0) + geom_boxplot(width=0.4, outlier.size=0.005) + 
-	theme_bw() + theme(legend.position="none", axis.title.x=element_blank()) + ylab("Age at Death (Weeks)") + labs(title="A")
+pdf("F1.A.pdf", height=8.2/3, width=8.2/3)
+p1<-ggplot(dat, aes(x=eventtime/7, col=diet, fill=diet)) +
+	geom_density(alpha=0.2) + theme_bw() + xlab("Age at Death (Weeks)") + labs(title="A") + ylab("Density") +
+	theme(legend.position=c(0.23, 0.7)) + xlim(0, 200)
 print(p1)
 dev.off()
 
 # plot a KM
-pdf("F1.B.pdf", height=5, width=5)
+pdf("F1.B.pdf", height=8.2/3, width=8.2/3)
 p2<-ggsurvplot(fit, legend="none", censor=F, title="B", xlab = "Time (Weeks)", ylab="Survivorship")
 print(p2)
 dev.off()
 
 # Check median survival time and effect
-meds<-ddply(dat, .(trts), summarise, median(eventtime))
+meds<-ddply(dat, .(trts), summarise, median(eventtime), mean(eventtime))
 meds
 meds[2,2]/meds[1,2]
+
+# Find the modes
+dat1<-dat[which(dat$diet == "DR"),]
+dat1$eventtime<-round(dat1$eventtime)
+mode<-ddply(dat1, .(round(eventtime)), summarise, length(eventtime))
+mode[order(mode$..1),]
+dat1<-dat[which(dat$diet == "AL"),]
+dat1$eventtime<-round(dat1$eventtime)
+mode<-ddply(dat1, .(round(eventtime)), summarise, length(eventtime))
+mode[order(mode$..1),]
+
+# Add in a histrogram of the mortality data in mice.
+Rikke_data<-read.csv("Rikke.csv")
+pdf("F1.C.pdf", height=8.2/3, width=8.2/3)
+p3<-ggplot(Rikke_data, aes(x=Lifespan/7)) + geom_histogram() + xlab("Age at Death (Weeks)") + labs(title="C") + theme_bw() + ylab("Count")
+print(p3)
+dev.off()
 
 # Lets simulate some strains, but assume no genetic variance
 set.seed(567)
@@ -104,12 +122,12 @@ effects<-effects[order(effects$ES, decreasing = T),]
 range(effects$ES)
 
 # Make waterfall plots
-pdf("F1.C.pdf", height=4, width=8)
+pdf("F1.D.pdf", height=8.2/3, width=6)
 p3<-ggplot(effects, aes(x=seq(1, 40, 1), y=ES)) + geom_point() + theme_bw() +
 	theme(axis.text.x=element_text(angle=90, size=10), axis.ticks.x=element_blank(), panel.grid.minor=element_blank()) + 
-	labs(title="C", x = "Strain ID", y = "Diff. Lifespan [DR - AL] - LM") + 
+	labs(title="D", x = "Strain ID", y = "Diff. Lifespan [DR - AL] - LM") + 
 	geom_hline(yintercept=0) + ylim(-300, 300) + 
-	annotate("text", x=seq(1, 40, 1), y=290, label=effects$signif, size=10) + 
+	annotate("text", x=seq(1, 40, 1), y=280, label=effects$signif, size=10) + 
 	scale_x_continuous(breaks=seq(1, 40, 1), labels=effects$strains)
 print(p3)
 dev.off()
@@ -178,12 +196,12 @@ cox_ES<-ranef(coxmm)$strain
 effects$cox<-cox_ES[match(effects$strains, row.names(cox_ES)), 2] + coxmm$coeff
 
 # Make waterfall plots
-pdf("F1.D.pdf", height=4, width=8)
+pdf("F1.E.pdf", height=8.2/3, width=6)
 p4<-ggplot(effects, aes(x=seq(1, 40, 1), y=ES)) + geom_point() + theme_bw() +
 	theme(axis.text.x=element_text(angle=90, size=10), axis.ticks.x=element_blank(), panel.grid.minor=element_blank()) + 
-	labs(title="D", x = "Strain ID", y = "MD Lifespan [DR - AL]") + 
+	labs(title="E", x = "Strain ID", y = "MD Lifespan [DR - AL]") + 
 	geom_hline(yintercept=0) +
-	annotate("text", x=seq(1, 40, 1), y=290, label=effects$signif, size=10) + 
+	annotate("text", x=seq(1, 40, 1), y=280, label=effects$signif, size=10) + 
 	scale_x_continuous(breaks=seq(1, 40, 1), labels=effects$strains)	 +
 	geom_point(aes(x=seq(1, 40, 1), y=lmm), inherit.aes=F, col="cornflowerblue") +
 	scale_y_continuous(limits=c(-300, 300))
@@ -193,10 +211,10 @@ dev.off()
 
 # Make waterfall plots of lnHR
 effects<-effects[order(effects$ES_hr),]
-pdf("F1.E.pdf", height=4, width=8)
+pdf("F1.F.pdf", height=8.2/3, width=6)
 p5<-ggplot(effects, aes(x=seq(1, 40, 1), y=ES_hr)) + geom_point() + theme_bw() +
 	theme(axis.text.x=element_text(angle=90, size=10), axis.ticks.x=element_blank(), panel.grid.minor=element_blank()) + 
-	labs(title="E", x = "Strain ID", y = "lnHR [DR / AL]") + 
+	labs(title="F", x = "Strain ID", y = "lnHR [DR / AL]") + 
 	geom_hline(yintercept=0) +
 	scale_x_continuous(breaks=seq(1, 40, 1), labels=effects$strains) + 
 	geom_point(aes(x=seq(1, 40, 1), y=cox), inherit.aes=F, col="cornflowerblue") + 
