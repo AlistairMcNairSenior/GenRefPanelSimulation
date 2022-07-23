@@ -132,7 +132,7 @@ power_sim<-function(n_strains, n, lnHR, sigma_IntG, sigma_TrtG, cor_IntTrt, a, b
 
 # Here I demonstrate application of the function, based on the parameterisation described in eText 3
 
-# As an example lets get 20 replicates with 30 strains, n = 10
+# As an example lets get 10 replicates per group with 30 strains (i.e., n = 10 per group)
 set.seed(123) # Setting seed for replicability
 results<-power_sim(n_strains=30, n=10, lnHR=-0.5, sigma_IntG=0, sigma_TrtG=0.5, cor_IntTrt=0, a=exp(-11.57), b=exp(-4.9), reps=20)
 
