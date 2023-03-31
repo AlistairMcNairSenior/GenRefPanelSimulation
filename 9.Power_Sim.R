@@ -104,7 +104,7 @@ power_sim<-function(n_strains, n, lnHR, sigma_IntG, sigma_TrtG, cor_IntTrt, a, b
 				
 				# Save the output from the cmm
 				results$lnHR[r]<-cmm$coef[1]
-				results$lnHR_p[r]<-pnorm(cmm$coef[1] / sqrt(vcov(cmm)), 0, 1) * 2
+				results$lnHR_p[r]<-pnorm(-abs(cmm$coef[1] / sqrt(vcov(cmm))), 0, 1) * 2
 				results$lnHR_sigma_G[r]<-sqrt(VarCorr(cmm)$strain[2,2])
 				results$lnHR_sigma_G_p[r]<-anova(cmm, cmm0)[2,4]
 				results$lnHR_R[r]<-cor(ranef(cmm)$strain[,2], ranef(cmm2)$strain[,2])
